@@ -2,7 +2,6 @@ package thredSafeClass;
 
 import lombok.SneakyThrows;
 
-import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
@@ -21,16 +20,18 @@ public class Main {
         thread.start();
     }
 }
+
+
+
 class DateFormatter {
 
-    private DateFormat df = new SimpleDateFormat("yyyy-MM-dd");
     public String format(Date date) {
-        return df.format(date);
+        return new SimpleDateFormat("yyyy-MM-dd").format(date);
     }
 
     @SneakyThrows
     public Date parse(String date) {
-        return df.parse(date);
+        return new SimpleDateFormat("yyyy-MM-dd").parse(date);
     }
 }
 
