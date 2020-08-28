@@ -33,7 +33,7 @@ class Task extends Thread {
 
     @SneakyThrows
     @Override
-    public synchronized void run() {
+    public void run() {
         latch.countDown();
         Thread.sleep(2000);
         System.out.println("Task " + id + " is await");
