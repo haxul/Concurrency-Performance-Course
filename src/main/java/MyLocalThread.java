@@ -8,24 +8,23 @@ class MyLocalThread {
         storage = new HashMap<>();
     }
 
-    private HashMap<Long, String> storage;
+    private HashMap<Thread, String> storage;
 
     public void set(String value) {
-        storage.put(getThreadId(), value);
+        storage.put(Thread.currentThread(), value);
+
     }
 
     public String get() {
-        return storage.get(getThreadId());
+        return storage.get(Thread.currentThread());
     }
 
     public void remove() {
-        storage.remove(getThreadId());
+        storage.remove(Thread.currentThread());
         if (storage.isEmpty()) storage = null;
     }
 
-    private long getThreadId() {
-        return Thread.currentThread().getId();
-    }
+
 }
 
 class Main {

@@ -67,8 +67,8 @@ public class Main {
 //        }).thenAccept((data) -> System.out.println("work is done: " + data )).join();
 
 // FIND NUMBERS SUM FOR INTEGER LIST
-        ExecutorService tpool = Executors.newFixedThreadPool(8);
-        int size = 1000;
+        ExecutorService tpool = Executors.newFixedThreadPool(2);
+        int size = 10000000;
         List<Integer> integers = IntStream.range(0, size).boxed().collect(Collectors.toList());
 //        AtomicInteger total = new AtomicInteger(0);
 //
@@ -83,20 +83,30 @@ public class Main {
 //        System.exit(0);
 
 // USING CompletionService
-        CompletionService<Integer> completionService = new ExecutorCompletionService<>(tpool);
-        int sum = 0;
-        ArrayList<Future<Integer>> futures = new ArrayList<>();
-        for (int i = 0; i < size; i++) {
-            int finalI = i;
-            Future<Integer> submit = completionService.submit(() -> integers.get(finalI));
-            futures.add(submit);
-        }
+//        CompletionService<Integer> completionService = new ExecutorCompletionService<>(tpool);
+//        int sum = 0;
+//        ArrayList<Future<Integer>> futures = new ArrayList<>();
+//        for (int i = 0; i < size; i++) {
+//            int finalI = i;
+//            Future<Integer> submit = completionService.submit(() -> integers.get(finalI));
+//            futures.add(submit);
+//        }
+//        tpool.shutdown();
+//
+//        for (int i = 0; i < futures.size(); i++) {
+//            sum += futures.get(i).get();
+//        }
+//        System.out.println(sum);
+        Future<Integer> sum1 = tpool.submit(() -> compute(integers, 0, integers.size() / 2));
+        Future<Integer> sum2 = tpool.submit(() -> compute(integers, integers.size()/2, integers.size()));
         tpool.shutdown();
+        System.out.println(sum1.get() + sum2.get());
+    }
 
-        for (int i = 0; i < futures.size(); i++) {
-            sum +=  futures.get(i).get();
-        }
-        System.out.println(sum);
+    public static int compute(List<Integer> list, int start, int end) {
+        var sum = 0;
+        for (int i = start; i < end; i++) sum += list.get(i);
+        return sum;
     }
 }
 
