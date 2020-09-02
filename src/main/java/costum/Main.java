@@ -17,7 +17,7 @@ public class Main {
         ExecutorService executorService = Executors.newFixedThreadPool(2);
 
         List<Future<Integer>> tasks = new ArrayList<>();
-        List.of(10, 20, 30, 30, 10, 2000, 3000, 4000).forEach(el-> {
+        List.of(10, 20, 30, 30, 10, 1000, 3000, 4000).forEach(el -> {
             Future<Integer> submit = executorService.submit(() -> {
                 Thread.sleep(el);
                 return el;
@@ -27,8 +27,9 @@ public class Main {
 
         executorService.shutdown();
         OwnItr ownItr = new OwnItr(tasks);
-        while (ownItr.hasNext()) {
-            System.out.println(ownItr.next());
+        Thread.sleep(2000);
+        for (var fut : tasks) {
+            if (fut.isDone()) System.out.println(fut.get());
         }
     }
 }
