@@ -1,7 +1,7 @@
 package async;
 
-import lombok.SneakyThrows;
 import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
@@ -10,8 +10,11 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -23,64 +26,50 @@ public class Main {
 //                "/home/haxul/Development/cuncurrency-course/src/main/java/async/source.json",
 //                "/home/haxul/Development/cuncurrency-course/src/main/java/async/source2.json"
 //        ));
-        jsonReader.test();
+        jsonReader.tester();
     }
 }
 
 
 class JsonReader {
-    private final JSONParser jsonParser = new JSONParser();
 
+    public void tester() {
+        List<String> urls = List.of(
+                "/home/haxul/Development/cuncurrency-course/src/main/java/async/source.json",
+                "/home/haxul/Development/cuncurrency-course/src/main/java/async/source2.json"
+        );
 
-    public void test() throws ExecutionException, InterruptedException {
-        long l = System.currentTimeMillis();
-
-        List<CompletableFuture<String>> futures = new ArrayList<>();
-        for (int i = 0; i < 3; i++) {
-            CompletableFuture<String> future1
-                    = CompletableFuture.supplyAsync(() -> {
+        List<CompletableFuture<JSONArray>> futures = new ArrayList<>();
+        for (var url : urls) {
+            CompletableFuture<JSONArray> future = CompletableFuture.supplyAsync(() -> {
                 try {
-                    Thread.sleep(2000);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
+                    if (url.equals( "/home/haxul/Development/cuncurrency-course/src/main/java/async/source2.json")) Thread.sleep(3000);
+                    JSONParser jsonParser = new JSONParser();
+                    return (JSONArray) jsonParser.parse(new FileReader(url));
+                } catch (Exception e) {
+                    System.err.println(e.getMessage());
+                    return null;
                 }
-                return "Hello";
             });
-            futures.add(future1);
+            futures.add(future);
         }
-
-        String combined = futures.stream()
-                .map(CompletableFuture::join)
-                .collect(Collectors.joining(" "));
-
-        System.out.println(System.currentTimeMillis() - l);
-        System.out.println(combined);
-
-    }
-
-    public CompletableFuture<JSONArray> readJson(String path) {
-        return CompletableFuture.supplyAsync(() -> {
+        List<JSONArray> collect = futures.stream().map(future -> {
             try {
-                return (JSONArray) jsonParser.parse(new FileReader(path));
+                return future.get(2, TimeUnit.SECONDS);
             } catch (Exception e) {
-                e.printStackTrace();
+                return null;
             }
-            return null;
-        });
+        }).filter(Objects::nonNull).collect(Collectors.toList());
+        List<Long> result = new ArrayList<>();
+        for (JSONArray jsonArray : collect) {
+           for (Object item : jsonArray) {
+               JSONObject el = (JSONObject) item;
+               Long id = (Long) el.get("id");
+               result.add(id);
+           }
+        }
+        result.sort((Long::compareTo));
+        System.out.println(result);
     }
 
-    public List<String> completableFutureAllof(List<String> paths) {
-        List<CompletableFuture<JSONArray>> list = new ArrayList<>();
-        paths.forEach(path -> {
-            list.add(readJson(path));
-        });
-
-        CompletableFuture<Void> allfuture = CompletableFuture.allOf(list.toArray(new CompletableFuture[list.size()]));//Created All of object
-        CompletableFuture<List<String>> allFutureList = allfuture.thenApply(val -> {
-            return list.stream().map(f -> f.join()).map(JSONArray::toString).collect(Collectors.toList());
-        });
-
-        List<String> join = allFutureList.join();
-        return join;
-    }
 }
