@@ -32,6 +32,7 @@ class JsonReader {
 
     public JSONArray tryParseJsonArray(String url) {
         try {
+            Thread.sleep(2000);
             JSONParser jsonParser = new JSONParser();
             return (JSONArray) jsonParser.parse(new FileReader(url));
         } catch (Exception r) {
@@ -41,14 +42,14 @@ class JsonReader {
 
     public JSONArray tryParseJsonArray(CompletableFuture<JSONArray> future) {
         try {
-            return future.get(2, TimeUnit.SECONDS);
+            return future.get(5, TimeUnit.SECONDS);
         } catch (Exception e) {
             return null;
         }
     }
 
     public void readJsonFiles(List<String> urls) {
-
+        long l = System.currentTimeMillis();
         List<CompletableFuture<JSONArray>> futures = urls.stream()
                 .map((url) -> CompletableFuture.supplyAsync(()-> tryParseJsonArray(url)))
                 .collect(Collectors.toList());
@@ -68,6 +69,7 @@ class JsonReader {
         }
         result.sort((Long::compareTo));
         System.out.println(result);
+        System.out.println(System.currentTimeMillis() - l);
     }
 
 }
