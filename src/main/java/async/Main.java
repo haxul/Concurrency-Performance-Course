@@ -68,8 +68,6 @@ class JsonReader {
             }
         }
         result.sort((Long::compareTo));
-        System.out.println(result);
-        System.out.println(System.currentTimeMillis() - l);
     }
 
 }
