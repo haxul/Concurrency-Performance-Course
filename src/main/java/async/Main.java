@@ -1,5 +1,6 @@
 package async;
 
+import lombok.SneakyThrows;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -17,6 +18,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 public class Main {
+    @SneakyThrows
     public static void main(String[] args) throws IOException, ParseException, FileNotFoundException, ExecutionException, InterruptedException {
         List<String> urls = List.of(
                 "/home/haxul/Development/cuncurrency-course/src/main/java/async/source.json",
@@ -24,6 +26,8 @@ public class Main {
         );
         JsonReader jsonReader = new JsonReader();
         jsonReader.readJsonFiles(urls);
+        // for test
+        CompletableFuture.supplyAsync(() -> "test").thenAccept(System.out::println);
     }
 }
 
